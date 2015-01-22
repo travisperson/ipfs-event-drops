@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="/ipfs/QmPKp8WxHdz2iKw6uPXyAo7uyV6yuPnmRFdPqgLDdcGPgH/css/style.css">
+<script src="/ipfs/QmPHHnsv2JmiejuKoQcnockMm3uxo3oN2kFnChZYH2PwQB/d3.js"></script>
+<script src="/ipfs/QmPKp8WxHdz2iKw6uPXyAo7uyV6yuPnmRFdPqgLDdcGPgH/src/eventDrops.js"></script>
+<script src="/ipfs/QmNm27DrXaAHtgCzGVtszFXpLGQF7DL9A92uK3p3cSei1r/src/qwest.js"></script>
+<style type="text/css">
+body {
+	font-family: verdana, sans-serif;
+}
+</style>
+</head>
+<body>
+<h1>IPFS Event Drop Chart</h1>
+<div id="chart_placeholder"></div>
+<div style="text-align: center" id="legend"></div>
+<script>
+var renderChart = function(data, startTime, endTime, middleTime) {
+	console.log("Draw Chart")
+
+	var chartPlaceholder = document.getElementById('chart_placeholder');
+
+	var graph = d3.chart.eventDrops()
+	.start(endTime - (1000*60*60*24))
+	.end(endTime)
+	.width(window.innerWidth - 500)
+	.eventColor(function (datum, index) {
+		return 'green'
+	})
+	.margin({ top: 100, left: 200, bottom: 0, right: 0 })
+	.axisFormat(function(xAxis) {
+		xAxis.ticks(5);
+	})
+	.eventHover(function(el) {
+	});
+
+	var element = d3.select(chartPlaceholder).append('div').datum(data);
+
+	graph(element);
+
+}
+	var hash = window.location.hash.substr(1);
+
+	if (hash !== undefined) {
+		console.log("Request Hash: " + hash);
+		qwest.get("/ipfs/" + hash)
+			.then(function(res) {
+				console.log("Got Data")
+				
+				var events = {}
+				var data = []
+				var startTime = null;
+				var endTime = null;
+				var lines = res.split("\n");
+				for (var i = 0; i < lines.length; i++) {
+					var e = null;
+					try {
+						e = JSON.parse(lines[i]);
+					} catch (err) {
+						console.log("Could not parse line ", i);
+						console.log(lines[i])
+						e = null
+					}
+					if (e != null) {
+						if (events[e.event] === undefined) {
+							events[e.event] = { index: data.length }
+							data.push({
+								name: e.event,
+								dates: []
+							})
+						}
+						
+						var t = new Date(e.time);
+						data[events[e.event].index].dates.push(t)
+
+						if (startTime == null) {
+							startTime = t;
+							endTime = t;
+						} else {
+							if ( t.getTime() < startTime.getTime())
+								startTime = t;
+
+							if ( t.getTime() > endTime.getTime())
+								endTime = t;
+						}
+					}
+
+				}
+
+				console.log("Finished Processing");
+
+				var middleTime = startTime.getTime() + ((endTime.getTime() - startTime.getTime()) / 2);
+
+				console.log(middleTime);
+
+				renderChart(data, startTime.getTime(), endTime.getTime(), middleTime);
+
+			}).catch(function(e) {
+				console.log(e)
+			});
+	}
+
+</script>
+</body>
+</html>
