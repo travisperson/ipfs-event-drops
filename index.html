@@ -13,48 +13,48 @@ body {
 	color: #333;
 }
 .dropdown-check-list {
-  display: inline-block;
+	display: inline-block;
 }
 .dropdown-check-list .anchor {
-  position: relative;
-  cursor: pointer;
-  display: inline-block;
-  padding: 5px 50px 5px 10px;
-  border: 1px solid #ccc;
+	position: relative;
+	cursor: pointer;
+	display: inline-block;
+	padding: 5px 50px 5px 10px;
+	border: 1px solid #ccc;
 }
 .dropdown-check-list .anchor:after {
-  position: absolute;
-  content: "";
-  border-left: 2px solid black;
-  border-top: 2px solid black;
-  padding: 5px;
-  right: 10px;
-  top: 20%;
-  -moz-transform: rotate(-135deg);
-  -ms-transform: rotate(-135deg);
-  -o-transform: rotate(-135deg);
-  -webkit-transform: rotate(-135deg);
-  transform: rotate(-135deg);
+	position: absolute;
+	content: "";
+	border-left: 2px solid black;
+	border-top: 2px solid black;
+	padding: 5px;
+	right: 10px;
+	top: 20%;
+	-moz-transform: rotate(-135deg);
+	-ms-transform: rotate(-135deg);
+	-o-transform: rotate(-135deg);
+	-webkit-transform: rotate(-135deg);
+	transform: rotate(-135deg);
 }
 .dropdown-check-list .anchor:active:after {
-  right: 8px;
-  top: 21%;
+	right: 8px;
+	top: 21%;
 }
 .dropdown-check-list ul.items {
-  padding: 2px;
-  display: none;
-  margin: 0;
-  border: 1px solid #ccc;
-  border-top: none;
+	padding: 2px;
+	display: none;
+	margin: 0;
+	border: 1px solid #ccc;
+	border-top: none;
 }
 .dropdown-check-list ul.items li {
-  list-style: none;
+	list-style: none;
 }
 .dropdown-check-list.visible .anchor {
-  color: #0094ff;
+	color: #0094ff;
 }
 .dropdown-check-list.visible .items {
-  display: block;
+	display: block;
 }
 
 #list {
@@ -79,6 +79,10 @@ header {
 	margin-top: -86px;
 }
 
+.graph-body .line circle {
+	opacity: 0.17;
+}
+
 #list1 span {
 	width: 120px;
 }
@@ -87,25 +91,25 @@ header {
 </head>
 <body>
 <header>
-<h1>IPFS Event Drop Chart</h1>
-<small>http://ipfs.io</small>
+	<h1>IPFS Event Drop Chart</h1>
+	<small>http://ipfs.io</small>
 </header>
 <div id="list1" class="dropdown-check-list" style="position:relative">
-        <span class="anchor">Events</span>
-        <ul class="items" id="list" style="position:absolute">
-        </ul>
-    </div>
+	<span class="anchor">Events</span>
+	<ul class="items" id="list" style="position:absolute">
+	</ul>
+</div>
 <div id="chart_placeholder"></div>
 <div style="text-align: center" id="legend"></div>
 <script>
 
 var checkList = document.getElementById('list1');
-        checkList.getElementsByClassName('anchor')[0].onclick = function (evt) {
-            if (checkList.classList.contains('visible'))
-                checkList.classList.remove('visible');
-            else
-                checkList.classList.add('visible');
-        }
+checkList.getElementsByClassName('anchor')[0].onclick = function (evt) {
+	if (checkList.classList.contains('visible'))
+		checkList.classList.remove('visible');
+	else
+		checkList.classList.add('visible');
+}
 </script>
 <script>
 var chartPlaceholder = document.getElementById('chart_placeholder');
@@ -115,23 +119,23 @@ var renderChart = function(data, startTime, endTime, middleTime) {
 	console.log("Draw Chart")
 
 
-	if ((endTime - startTime) > (1000*60*60*24)) {
-		startTime = endTime - 1000*60*60*24
-	}
+		if ((endTime - startTime) > (1000*60*60*24)) {
+			startTime = endTime - 1000*60*60*24
+		}
 
 	graph = d3.chart.eventDrops()
-	.start(startTime)
-	.end(endTime)
-	.width(window.innerWidth - 50)
-	.eventColor(function (datum, index) {
-		return '#08c'
-	})
+		.start(startTime)
+		.end(endTime)
+		.width(window.innerWidth - 50)
+		.eventColor(function (datum, index) {
+				return '#08c'
+				})
 	.margin({ top: 100, left: 200, bottom: 0, right: 0 })
-	.axisFormat(function(xAxis) {
-		xAxis.ticks(5);
-	})
+		.axisFormat(function(xAxis) {
+				xAxis.ticks(5);
+				})
 	.eventHover(function(el) {
-	});
+			});
 
 	element = d3.select(chartPlaceholder).append('div').datum(data);
 
@@ -141,142 +145,142 @@ var renderChart = function(data, startTime, endTime, middleTime) {
 
 var UpdateChart = function(data) {
 	console.log("Update", data.lenght)
-	element = d3.select(chartPlaceholder).select('div').datum(data);
+		element = d3.select(chartPlaceholder).select('div').datum(data);
 	graph(element);
 }
 
-	var hash = window.location.hash.substr(1);
-	var toggleList = {}
+var hash = window.location.hash.substr(1);
+var toggleList = {}
 
-	if (hash !== undefined) {
-		console.log("Request Hash: " + hash);
-		var CheckList = document.getElementById("list")
+if (hash !== undefined) {
+	console.log("Request Hash: " + hash);
+	var CheckList = document.getElementById("list")
 		qwest.get("/ipfs/" + hash)
-			.then(function(res) {
+		.then(function(res) {
 				console.log("Got Data")
-				
+
 				var events = {}
 				var data = []
 				var startTime = null;
 				var endTime = null;
 				var lines = res.split("\n");
 				for (var i = 0; i < lines.length; i++) {
-					var e = null;
-					try {
-						e = JSON.parse(lines[i]);
-					} catch (err) {
-						console.log("Could not parse line ", i);
-						console.log(lines[i])
-						e = null
-					}
-					if (e != null) {
-						if (events[e.event] === undefined) {
-
-							events[e.event] = { index: data.length }
-							data.push({
-								name: e.event,
-								dates: []
-							})
-						}
-						
-						var t = new Date(e.time);
-						data[events[e.event].index].dates.push(t)
-
-						if (startTime == null) {
-							startTime = t;
-							endTime = t;
-						} else {
-							if ( t.getTime() < startTime.getTime())
-								startTime = t;
-
-							if ( t.getTime() > endTime.getTime())
-								endTime = t;
-						}
-					}
+				var e = null;
+				try {
+				e = JSON.parse(lines[i]);
+				} catch (err) {
+				console.log("Could not parse line ", i);
+				console.log(lines[i])
+				e = null
 				}
+				if (e != null) {
+				if (events[e.event] === undefined) {
 
+				events[e.event] = { index: data.length }
+				data.push({
+name: e.event,
+dates: []
+})
+}
 
-				keys = Object.keys(events).sort(function(a,b) {
-					return a.localeCompare(b)
-				})
-					
-				keys.forEach(function(e) {
-					console.log(e)
-					var el = document.createElement('li')
-					var lb = document.createElement('label')
-					var cx = document.createElement('input')
-						cx.type = "checkbox"
-						cx.checked = true
-					var tx = document.createElement('span')
-						tx.textContent = e
-					
-					lb.appendChild(cx)
-					lb.appendChild(tx)
-					el.appendChild(lb)
+var t = new Date(e.time);
+data[events[e.event].index].dates.push(t)
 
-					cx.onclick = (function (ev) {
-						return function () {
-							console.log(ev)
-							toggleList[ev] = !toggleList[ev]
+	if (startTime == null) {
+		startTime = t;
+		endTime = t;
+	} else {
+		if ( t.getTime() < startTime.getTime())
+			startTime = t;
 
-							var ndata = data.filter(function (el) {
-								console.log(el.name, toggleList[el.name])
-								if (toggleList[el.name] == true) {
-									return false;
-								} else {
-									return true;
-								}
-							})
-
-							UpdateChart(ndata)
-						}
-					})(e)
-
-					toggleList[e.event] = true
-
-					CheckList.appendChild(el)
-				})
-
-				if (i > 1000) {
-					var newStartTime = null
-					var offset = 1000;
-					while( newStartTime == null ) {
-						var line = lines[lines.length - offset];
-						var e = null;
-
-						try {
-							e = JSON.parse(line);
-						} catch (err) {
-							console.log("Could not parse line ", i);
-							console.log(lines[i])
-							e = null
-						}
-
-						if (e) {
-							newStartTime = new Date(e.time)
-							startTime = newStartTime
-						} else {
-							offset -= 1
-						}
-					}
-				}
-
-				data.sort(function(a, b) {
-					return a.name.localeCompare(b.name)
-				})
-
-				console.log("Finished Processing");
-
-				var middleTime = startTime.getTime() + ((endTime.getTime() - startTime.getTime()) / 2);
-
-				console.log(middleTime);
-
-				renderChart(data, startTime.getTime(), endTime.getTime(), middleTime);
-
-			}).catch(function(e) {
-				console.log(e)
-			});
+		if ( t.getTime() > endTime.getTime())
+			endTime = t;
 	}
+}
+}
+
+
+keys = Object.keys(events).sort(function(a,b) {
+		return a.localeCompare(b)
+		})
+
+keys.forEach(function(e) {
+		console.log(e)
+		var el = document.createElement('li')
+		var lb = document.createElement('label')
+		var cx = document.createElement('input')
+		cx.type = "checkbox"
+		cx.checked = true
+		var tx = document.createElement('span')
+		tx.textContent = e
+
+		lb.appendChild(cx)
+		lb.appendChild(tx)
+		el.appendChild(lb)
+
+		cx.onclick = (function (ev) {
+				return function () {
+				console.log(ev)
+				toggleList[ev] = !toggleList[ev]
+
+				var ndata = data.filter(function (el) {
+						console.log(el.name, toggleList[el.name])
+						if (toggleList[el.name] == true) {
+						return false;
+						} else {
+						return true;
+						}
+						})
+
+				UpdateChart(ndata)
+				}
+				})(e)
+
+		toggleList[e.event] = true
+
+			CheckList.appendChild(el)
+})
+
+if (i > 1000) {
+	var newStartTime = null
+		var offset = 1000;
+	while( newStartTime == null ) {
+		var line = lines[lines.length - offset];
+		var e = null;
+
+		try {
+			e = JSON.parse(line);
+		} catch (err) {
+			console.log("Could not parse line ", i);
+			console.log(lines[i])
+				e = null
+		}
+
+		if (e) {
+			newStartTime = new Date(e.time)
+				startTime = newStartTime
+		} else {
+			offset -= 1
+		}
+	}
+}
+
+data.sort(function(a, b) {
+		return a.name.localeCompare(b.name)
+		})
+
+console.log("Finished Processing");
+
+var middleTime = startTime.getTime() + ((endTime.getTime() - startTime.getTime()) / 2);
+
+console.log(middleTime);
+
+renderChart(data, startTime.getTime(), endTime.getTime(), middleTime);
+
+}).catch(function(e) {
+	console.log(e)
+	});
+}
 
 </script>
 </body>
