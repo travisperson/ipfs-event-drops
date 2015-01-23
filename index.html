@@ -114,34 +114,48 @@ checkList.getElementsByClassName('anchor')[0].onclick = function (evt) {
 <script>
 var chartPlaceholder = document.getElementById('chart_placeholder');
 var graph, element
-
-var renderChart = function(data, startTime, endTime, middleTime) {
-	console.log("Draw Chart")
-
-
-		if ((endTime - startTime) > (1000*60*60*24)) {
-			startTime = endTime - 1000*60*60*24
-		}
-
-	graph = d3.chart.eventDrops()
-		.start(startTime)
-		.end(endTime)
-		.width(window.innerWidth - 50)
-		.eventColor(function (datum, index) {
-				return '#08c'
-				})
-	.margin({ top: 100, left: 200, bottom: 0, right: 0 })
-		.axisFormat(function(xAxis) {
-				xAxis.ticks(5);
-				})
-	.eventHover(function(el) {
-			});
-
-	element = d3.select(chartPlaceholder).append('div').datum(data);
-
-	graph(element);
-
+hashCode = function (s) {
+	var h = 0, i = 0, l = s.length;
+	if (l === 0) return h;
+	for (; i < l; i++) {
+		h = ((h << 5) - h) + s.charCodeAt(i);
+		h |= 0; // Convert to 32bit integer
+	}
+	return h;
 }
+var gColor = d3.scale.category20()
+
+	var renderChart = function(data, startTime, endTime, middleTime) {
+		console.log("Draw Chart")
+
+
+			if ((endTime - startTime) > (1000*60*60*24)) {
+				startTime = endTime - 1000*60*60*24
+			}
+
+		graph = d3.chart.eventDrops()
+			.start(startTime)
+			.end(endTime)
+			.width(window.innerWidth - 50)
+			.eventColor(function (datum, index) {
+					if (datum.e.peerID) {
+						return gColor(hashCode(datum.e.peerID))
+					} else {
+						return '#000'
+					}
+					})
+		.margin({ top: 100, left: 200, bottom: 0, right: 0 })
+			.axisFormat(function(xAxis) {
+					xAxis.ticks(5);
+					})
+		.eventHover(function(el) {
+				});
+
+		element = d3.select(chartPlaceholder).append('div').datum(data);
+
+		graph(element);
+
+	}
 
 var UpdateChart = function(data) {
 	console.log("Update", data.lenght)
@@ -184,6 +198,7 @@ dates: []
 }
 
 var t = new Date(e.time);
+t.e = e
 data[events[e.event].index].dates.push(t)
 
 	if (startTime == null) {
