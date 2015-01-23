@@ -10,6 +10,7 @@
 <style type="text/css">
 body {
 	font: normal 14px/100% "Andale Mono", AndaleMono, monospace;
+	color: #333;
 }
 .dropdown-check-list {
   display: inline-block;
@@ -61,10 +62,34 @@ body {
 	padding: 10px;
 	width: 300px;
 }
+
+.x-axis path {
+	fill: #ccc;
+}
+
+.y-axis g line {
+	stroke: #efefef;stroke-width:1;
+}
+
+header {
+	margin-bottom: 8px;
+}
+
+#chart_placeholder {
+	margin-top: -86px;
+}
+
+#list1 span {
+	width: 120px;
+}
+
 </style>
 </head>
 <body>
+<header>
 <h1>IPFS Event Drop Chart</h1>
+<small>http://ipfs.io</small>
+</header>
 <div id="list1" class="dropdown-check-list" style="position:relative">
         <span class="anchor">Events</span>
         <ul class="items" id="list" style="position:absolute">
@@ -97,9 +122,9 @@ var renderChart = function(data, startTime, endTime, middleTime) {
 	graph = d3.chart.eventDrops()
 	.start(startTime)
 	.end(endTime)
-	.width(window.innerWidth - 500)
+	.width(window.innerWidth - 50)
 	.eventColor(function (datum, index) {
-		return 'green'
+		return '#08c'
 	})
 	.margin({ top: 100, left: 200, bottom: 0, right: 0 })
 	.axisFormat(function(xAxis) {
@@ -146,41 +171,6 @@ var UpdateChart = function(data) {
 					}
 					if (e != null) {
 						if (events[e.event] === undefined) {
-							var el = document.createElement('li')
-							var lb = document.createElement('label')
-							var cx = document.createElement('input')
-								cx.type = "checkbox"
-							var tx = document.createElement('span')
-								tx.textContent = e.event
-							
-							lb.appendChild(cx)
-							lb.appendChild(tx)
-							el.appendChild(lb)
-
-							cx.onclick = (function (ev) {
-								return function () {
-									console.log(ev.event)
-									console.log(events[ev.event].index)
-									toggleList[ev.event] = !toggleList[ev.event]
-
-									var ndata = data.filter(function (el) {
-										console.log(el.name, toggleList[el.name])
-										if (toggleList[el.name] == false) {
-											return false;
-										} else {
-											return true;
-										}
-									})
-
-									console.log(ndata)
-
-									UpdateChart(ndata)
-								}
-							})(e)
-
-							toggleList[e.event] = true
-
-							CheckList.appendChild(el)
 
 							events[e.event] = { index: data.length }
 							data.push({
@@ -204,6 +194,48 @@ var UpdateChart = function(data) {
 						}
 					}
 				}
+
+
+				keys = Object.keys(events).sort(function(a,b) {
+					return a.localeCompare(b)
+				})
+					
+				keys.forEach(function(e) {
+					console.log(e)
+					var el = document.createElement('li')
+					var lb = document.createElement('label')
+					var cx = document.createElement('input')
+						cx.type = "checkbox"
+						cx.checked = true
+					var tx = document.createElement('span')
+						tx.textContent = e
+					
+					lb.appendChild(cx)
+					lb.appendChild(tx)
+					el.appendChild(lb)
+
+					cx.onclick = (function (ev) {
+						return function () {
+							console.log(ev)
+							toggleList[ev] = !toggleList[ev]
+
+							var ndata = data.filter(function (el) {
+								console.log(el.name, toggleList[el.name])
+								if (toggleList[el.name] == true) {
+									return false;
+								} else {
+									return true;
+								}
+							})
+
+							UpdateChart(ndata)
+						}
+					})(e)
+
+					toggleList[e.event] = true
+
+					CheckList.appendChild(el)
+				})
 
 				if (i > 1000) {
 					var newStartTime = null
