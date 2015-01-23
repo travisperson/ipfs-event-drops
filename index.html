@@ -2,28 +2,100 @@
 <meta charset="utf-8">
 <html>
 <head>
-<link rel="stylesheet" type="text/css" href="/ipfs/QmPKp8WxHdz2iKw6uPXyAo7uyV6yuPnmRFdPqgLDdcGPgH/css/style.css">
-<script src="/ipfs/QmPHHnsv2JmiejuKoQcnockMm3uxo3oN2kFnChZYH2PwQB/d3.js"></script>
-<script src="/ipfs/QmPKp8WxHdz2iKw6uPXyAo7uyV6yuPnmRFdPqgLDdcGPgH/src/eventDrops.js"></script>
-<script src="/ipfs/QmNm27DrXaAHtgCzGVtszFXpLGQF7DL9A92uK3p3cSei1r/src/qwest.js"></script>
+
+<link rel="stylesheet" type="text/css" href="/ipfs/QmPpto27uhVzbSrd6oxXbNRKnoxqJnZTSgLZozN7P4GWJq/css/style.css">
+<script src="/ipfs/QmRd8ZmbwxDU8JrJWa91KkTEPEuZtUF2ZUNQ8K2R9XSFYN/d3.js"></script>
+<script src="/ipfs/QmPpto27uhVzbSrd6oxXbNRKnoxqJnZTSgLZozN7P4GWJq/src/eventDrops.js"></script>
+<script src="/ipfs/Qmd5hJmvRnsEaiYorSfSCbRSjEKpFMw8TBugsH5NBoeQPW/src/qwest.js"></script>
 <style type="text/css">
 body {
-	font-family: verdana, sans-serif;
+	font: normal 14px/100% "Andale Mono", AndaleMono, monospace;
+}
+.dropdown-check-list {
+  display: inline-block;
+}
+.dropdown-check-list .anchor {
+  position: relative;
+  cursor: pointer;
+  display: inline-block;
+  padding: 5px 50px 5px 10px;
+  border: 1px solid #ccc;
+}
+.dropdown-check-list .anchor:after {
+  position: absolute;
+  content: "";
+  border-left: 2px solid black;
+  border-top: 2px solid black;
+  padding: 5px;
+  right: 10px;
+  top: 20%;
+  -moz-transform: rotate(-135deg);
+  -ms-transform: rotate(-135deg);
+  -o-transform: rotate(-135deg);
+  -webkit-transform: rotate(-135deg);
+  transform: rotate(-135deg);
+}
+.dropdown-check-list .anchor:active:after {
+  right: 8px;
+  top: 21%;
+}
+.dropdown-check-list ul.items {
+  padding: 2px;
+  display: none;
+  margin: 0;
+  border: 1px solid #ccc;
+  border-top: none;
+}
+.dropdown-check-list ul.items li {
+  list-style: none;
+}
+.dropdown-check-list.visible .anchor {
+  color: #0094ff;
+}
+.dropdown-check-list.visible .items {
+  display: block;
+}
+
+#list {
+	background: #fff;
+	padding: 10px;
+	width: 300px;
 }
 </style>
 </head>
 <body>
 <h1>IPFS Event Drop Chart</h1>
+<div id="list1" class="dropdown-check-list" style="position:relative">
+        <span class="anchor">Events</span>
+        <ul class="items" id="list" style="position:absolute">
+        </ul>
+    </div>
 <div id="chart_placeholder"></div>
 <div style="text-align: center" id="legend"></div>
 <script>
+
+var checkList = document.getElementById('list1');
+        checkList.getElementsByClassName('anchor')[0].onclick = function (evt) {
+            if (checkList.classList.contains('visible'))
+                checkList.classList.remove('visible');
+            else
+                checkList.classList.add('visible');
+        }
+</script>
+<script>
+var chartPlaceholder = document.getElementById('chart_placeholder');
+var graph, element
+
 var renderChart = function(data, startTime, endTime, middleTime) {
 	console.log("Draw Chart")
 
-	var chartPlaceholder = document.getElementById('chart_placeholder');
 
-	var graph = d3.chart.eventDrops()
-	.start(endTime - (1000*60*60*24))
+	if ((endTime - startTime) > (1000*60*60*24)) {
+		startTime = endTime - 1000*60*60*24
+	}
+
+	graph = d3.chart.eventDrops()
+	.start(startTime)
 	.end(endTime)
 	.width(window.innerWidth - 500)
 	.eventColor(function (datum, index) {
@@ -36,15 +108,24 @@ var renderChart = function(data, startTime, endTime, middleTime) {
 	.eventHover(function(el) {
 	});
 
-	var element = d3.select(chartPlaceholder).append('div').datum(data);
+	element = d3.select(chartPlaceholder).append('div').datum(data);
 
 	graph(element);
 
 }
+
+var UpdateChart = function(data) {
+	console.log("Update", data.lenght)
+	element = d3.select(chartPlaceholder).select('div').datum(data);
+	graph(element);
+}
+
 	var hash = window.location.hash.substr(1);
+	var toggleList = {}
 
 	if (hash !== undefined) {
 		console.log("Request Hash: " + hash);
+		var CheckList = document.getElementById("list")
 		qwest.get("/ipfs/" + hash)
 			.then(function(res) {
 				console.log("Got Data")
@@ -65,6 +146,42 @@ var renderChart = function(data, startTime, endTime, middleTime) {
 					}
 					if (e != null) {
 						if (events[e.event] === undefined) {
+							var el = document.createElement('li')
+							var lb = document.createElement('label')
+							var cx = document.createElement('input')
+								cx.type = "checkbox"
+							var tx = document.createElement('span')
+								tx.textContent = e.event
+							
+							lb.appendChild(cx)
+							lb.appendChild(tx)
+							el.appendChild(lb)
+
+							cx.onclick = (function (ev) {
+								return function () {
+									console.log(ev.event)
+									console.log(events[ev.event].index)
+									toggleList[ev.event] = !toggleList[ev.event]
+
+									var ndata = data.filter(function (el) {
+										console.log(el.name, toggleList[el.name])
+										if (toggleList[el.name] == false) {
+											return false;
+										} else {
+											return true;
+										}
+									})
+
+									console.log(ndata)
+
+									UpdateChart(ndata)
+								}
+							})(e)
+
+							toggleList[e.event] = true
+
+							CheckList.appendChild(el)
+
 							events[e.event] = { index: data.length }
 							data.push({
 								name: e.event,
@@ -86,8 +203,35 @@ var renderChart = function(data, startTime, endTime, middleTime) {
 								endTime = t;
 						}
 					}
-
 				}
+
+				if (i > 1000) {
+					var newStartTime = null
+					var offset = 1000;
+					while( newStartTime == null ) {
+						var line = lines[lines.length - offset];
+						var e = null;
+
+						try {
+							e = JSON.parse(line);
+						} catch (err) {
+							console.log("Could not parse line ", i);
+							console.log(lines[i])
+							e = null
+						}
+
+						if (e) {
+							newStartTime = new Date(e.time)
+							startTime = newStartTime
+						} else {
+							offset -= 1
+						}
+					}
+				}
+
+				data.sort(function(a, b) {
+					return a.name.localeCompare(b.name)
+				})
 
 				console.log("Finished Processing");
 
