@@ -12,5 +12,5 @@ Open the index file via the provided hash above (or clone and add the file yours
 Ex:
 
 ```
-http://ipfs.travisperson.com/ipfs/QmRrqLvLbADPppgU9G1ZxwsPKSdz7heRHPouFvQF2ysrfX#<ipfs event log hash>
+http://ipfs.travisperson.com/ipfs/QmZG2myp9HcHWWFsY23nnrWNUtreTFvQAXMDMSiVP45gF7#<ipfs event log hash>
 ```
