@@ -5,7 +5,7 @@ IPFS Hash `QmZG2myp9HcHWWFsY23nnrWNUtreTFvQAXMDMSiVP45gF7`
 
 Displays a event drop graph of an IPFS event log.
 
-[See a live example](http://ipfs.travisperson.com/ipfs/QmZG2myp9HcHWWFsY23nnrWNUtreTFvQAXMDMSiVP45gF7#QmWc1BYzzEwcVLK21GgFgzbWSrz3fnuXSvqRRwdn1n7Lrx)
+[See a live example](http://ipfs.travisperson.com:8080/ipfs/QmZG2myp9HcHWWFsY23nnrWNUtreTFvQAXMDMSiVP45gF7#QmWc1BYzzEwcVLK21GgFgzbWSrz3fnuXSvqRRwdn1n7Lrx)
 
 Usage:
 
